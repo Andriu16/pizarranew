@@ -1,0 +1,95 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collaborative Whiteboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.5.0/fabric.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.min.js"></script>
+</head>
+<style>
+
+    body {
+        color: white;
+        overflow: hidden;
+        background-color: #333333;
+    }
+
+   
+</style>
+
+<body>
+    <div id="whiteboard"></div>
+    <canvas id="canvas" width="1528" height="790"> </canvas>
+    <script>
+        window.embeddedChatbotConfig = {
+        chatbotId: "PdTrNDUFeKpWExsl1zrwj",
+        domain: "www.chatbase.co"
+        }
+        </script>
+        <script
+        src="https://www.chatbase.co/embed.min.js"
+        chatbotId="PdTrNDUFeKpWExsl1zrwj"
+        domain="www.chatbase.co"
+        defer>
+        </script>
+    
+
+    <script>
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        var canvas = new fabric.Canvas('canvas', {
+            isDrawingMode: true
+        });
+
+        // Configurar el pincel de dibujo
+        canvas.freeDrawingBrush.color = 'black';
+        canvas.freeDrawingBrush.width = 5;
+
+        // Deshabilitar el relleno de las formas
+        canvas.freeDrawingBrush.fill = null;
+
+        // Establecer el trazo de las formas a negro
+        canvas.freeDrawingBrush.stroke = 'black';
+
+        canvas.on('path:created', function (options) {
+            var path = options.path;
+            var message = {
+                type: 'draw',
+                path: path
+            };
+            socket.emit('message', message);
+        });
+
+        socket.on('message', function (message) {
+            if (message.type === 'draw') {
+                var path = new fabric.Path(message.path.path, {
+                    fill: null,
+                    stroke: 'black'
+                });
+                canvas.add(path);
+                canvas.renderAll();
+            }
+        });
+
+        function runCode() {
+            socket.emit('message', { 'code': 'java code to be executed' });
+        }
+
+        socket.on('message', function (message) {
+            // Maneja el mensaje recibido del servidor (salida del código ejecutado)
+            // ...
+        });
+
+
+
+
+
+
+
+    </script>
+</body>
+
+</html>
